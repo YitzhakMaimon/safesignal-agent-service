@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSignal HQ - חמ"ל ניתוח ומניעת מצוקה ברשת</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SafeSignal HQ</h1>
+        <p>מערכת בקרה מבוססת RAG לזיהוי אותות מצוקה, חרם וסיכון ברשת</p>
+    </header>
+
+    <!-- דאשבורד קונספט ויזואלי המציג את תזרים המידע של הפרויקט -->
+    <div class="concept-dashboard">
+        <div class="concept-side">
+            <div class="home-box">
+                <div class="signal-dot pulsing"></div>
+                <h4>פלטפורמות רשת</h4>
+                <p>פוסטים, צ'אטים וטקסטים ציבוריים</p>
+            </div>
+        </div>
+        
+        <div class="concept-center-lines">
+            <div class="data-stream-line"></div>
+            <div class="data-stream-line"></div>
+            <div class="data-stream-line"></div>
+        </div>
+        
+        <div class="concept-side" style="text-align: left;">
+            <div class="hq-box">
+                <h4>מרכז ניתוח AWS Bedrock</h4>
+                <p>סריקה מול מאגר מידע מוסמך</p>
+                <div class="hq-monitor-sim">STATUS: ACTIVE_MONITORING</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- הצגת שגיאות במידה וקיימות -->
+    {% if error %}
+        <div class="alert alert-error">
+            <strong>שגיאת מערכת:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- טופס הזנת שאילתה / טקסט לבדיקה -->
+    <div class="analysis-form">
+        <form method="POST">
+            <label for="user_text">הזן טקסט, פוסט או הודעה החשודים כאירוע מצוקה:</label>
+            <textarea id="user_text" name="user_text" placeholder="הקלד או הדבק את הטקסט כאן לניתוח חמ''ל..." required>{% if original_text %}{{ original_text }}{% endif %}</textarea>
+            <button type="submit">הפעל סריקה וניתוח RAG</button>
+        </form>
+    </div>
+
+    <!-- הצגת תוצאות הניתוח של ה-LLM -->
+    {% if result %}
+        <h2>דו''ח ניתוח אירוע (amazon.nova-micro)</h2>
+        <div class="result-box" style="white-space: pre-line;">
+            {{ result }}
+        </div>
+    {% endif %}
+
+    <!-- הצגת כרטיסי המקורות מתוך ה-Vector Store -->
+    {% if sources %}
+        <h2>מקורות מידע ואסמכתאות שולפו (Citations)</h2>
+        <div class="sources-grid">
+            {% for source in sources %}
+                <div class="source-card">
+                    <h3>מקור: <span>{{ source.file }}</span></h3>
+                    <p>"{{ source.text }}"</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <footer>
+        <p>SafeSignal Project &copy; 2026 | מבוסס Amazon Bedrock Knowledge Base & Flask</p>
+    </footer>
+</div>
+
+</body>
+</html>
