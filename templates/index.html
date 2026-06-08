@@ -1,85 +1,312 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeSignal HQ - חמ"ל ניתוח ומניעת מצוקה ברשת</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeSignal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+<div class="app">
 
-<div class="container">
-    <header>
-        <h1>SafeSignal HQ</h1>
-        <p>מערכת בקרה מבוססת RAG לזיהוי אותות מצוקה, חרם וסיכון ברשת</p>
-    </header>
-
-    <!-- דאשבורד קונספט ויזואלי המציג את תזרים המידע של הפרויקט -->
-    <div class="concept-dashboard">
-        <div class="concept-side">
-            <div class="home-box">
-                <div class="signal-dot pulsing"></div>
-                <h4>פלטפורמות רשת</h4>
-                <p>פוסטים, צ'אטים וטקסטים ציבוריים</p>
-            </div>
-        </div>
-        
-        <div class="concept-center-lines">
-            <div class="data-stream-line"></div>
-            <div class="data-stream-line"></div>
-            <div class="data-stream-line"></div>
-        </div>
-        
-        <div class="concept-side" style="text-align: left;">
-            <div class="hq-box">
-                <h4>מרכז ניתוח AWS Bedrock</h4>
-                <p>סריקה מול מאגר מידע מוסמך</p>
-                <div class="hq-monitor-sim">STATUS: ACTIVE_MONITORING</div>
-            </div>
-        </div>
+  <!-- ═══ TITLEBAR ═══ -->
+  <div class="titlebar">
+    <div class="tb-dots">
+      <div class="tb-dot r"></div>
+      <div class="tb-dot y"></div>
+      <div class="tb-dot g"></div>
+    </div>
+    <div class="tb-title">
+      <i class="fas fa-shield-halved"></i>
+      SafeSignal &mdash; Digital Distress Detection System
     </div>
 
-    <!-- הצגת שגיאות במידה וקיימות -->
-    {% if error %}
-        <div class="alert alert-error">
-            <strong>שגיאת מערכת:</strong> {{ error }}
-        </div>
-    {% endif %}
+  </div>
 
-    <!-- טופס הזנת שאילתה / טקסט לבדיקה -->
-    <div class="analysis-form">
-        <form method="POST">
-            <label for="user_text">הזן טקסט, פוסט או הודעה החשודים כאירוע מצוקה:</label>
-            <textarea id="user_text" name="user_text" placeholder="הקלד או הדבק את הטקסט כאן לניתוח חמ''ל..." required>{% if original_text %}{{ original_text }}{% endif %}</textarea>
-            <button type="submit">הפעל סריקה וניתוח RAG</button>
-        </form>
+  <!-- ═══ MAIN ═══ -->
+  <div class="main{% if result %} has-result{% endif %}">
+
+    <!-- ═══ LEFT: RADAR ═══ -->
+    <div class="radar-section">
+
+      <!-- Radar -->
+      <div class="radar-wrap">
+
+        <!-- Base fill -->
+        <div class="radar-base"></div>
+
+        <!-- Glow ring -->
+        <div class="radar-glow"></div>
+
+        <!-- Concentric rings -->
+        <div class="radar-rings">
+          <div class="r-ring r-ring-1"></div>
+          <div class="r-ring r-ring-2"></div>
+          <div class="r-ring r-ring-3"></div>
+          <div class="r-ring r-ring-4"></div>
+        </div>
+
+        <!-- Cross lines -->
+        <div class="radar-cross"></div>
+
+        <!-- Sweep -->
+        <div class="radar-sweep" id="radarSweep"></div>
+
+        <!-- Center label -->
+        <div class="radar-center">
+          <div class="radar-center-label">SAFESIGNAL</div>
+          <div class="radar-center-sub">DIGITAL DISTRESS DETECTION</div>
+        </div>
+
+      </div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <div class="ss-item">
+          <div class="ss-dot" id="dot-ec2"></div> EC2 Server
+          <span class="ss-val ss-val-muted" id="val-ec2">CHECKING</span>
+        </div>
+        <div class="ss-item">
+          <div class="ss-dot" id="dot-agent"></div> Bedrock Agent
+          <span class="ss-val ss-val-muted" id="val-agent">CHECKING</span>
+        </div>
+        <div class="ss-item">
+          <div class="ss-dot ss-dot-muted" id="dot-email"></div> Email Alert
+          <span class="ss-val ss-val-muted" id="val-email">STANDBY</span>
+        </div>
+      </div>
+
+      <!-- Result area -->
+      {% if result %}
+      <div class="result-area">
+
+        {% if history_total and history_total > 3 %}
+        <div class="history-banner history-danger">
+          <div class="hb-icon"><i class="fas fa-clock-rotate-left"></i></div>
+          <div>
+            <strong>Warning — Recurring Distress Pattern</strong>
+            <span><bdi>{{ history_total }}</bdi> distress posts detected &nbsp;·&nbsp; since <bdi>{{ history_first }}</bdi></span>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if category == 1 %}
+        <div class="cat-banner cat-1">
+          <div class="cb-icon"><i class="fas fa-triangle-exclamation"></i></div>
+          <div>
+            <strong>Category 1 — Suicide Risk</strong>
+            <span>Immediate Action &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; MDA: <b>101</b></span>
+          </div>
+        </div>
+        {% elif category == 2 %}
+        <div class="cat-banner cat-2">
+          <div class="cb-icon"><i class="fas fa-heart"></i></div>
+          <div>
+            <strong>Category 2 — Mental Distress</strong>
+            <span>Help Required &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; Hotline: <b>105</b></span>
+          </div>
+        </div>
+        {% elif category == 3 %}
+        <div class="cat-banner cat-3">
+          <div class="cb-icon"><i class="fas fa-users"></i></div>
+          <div>
+            <strong>Category 3 — Cyberbullying</strong>
+            <span>Identify &amp; Assist &nbsp;·&nbsp; Hotline: <b>105</b></span>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if alert_sent %}
+        <div class="alert-sent-bar">
+          <i class="fas fa-envelope-circle-check"></i>{{ alert_sent }}
+        </div>
+        {% endif %}
+
+        <div class="result-text-box">{{ result }}</div>
+
+        {% if category %}
+        <div class="resources-block">
+          <div class="rb-title"><i class="fas fa-phone-volume"></i> Relevant Support Resources</div>
+          {% if category == 1 %}
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי מיידי</span></div>
+          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — סכנת חיים מיידית</span></div>
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+          {% elif category == 2 %}
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי</span></div>
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+          {% elif category == 3 %}
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת — בריונות, שיימינג, הטרדה</span></div>
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — איומים, סחיטה, עברות פליליות ברשת</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if sources %}
+        <details class="sources-block">
+          <summary class="sources-heading">
+            <i class="fas fa-book-open"></i> Sources
+            <span class="src-count">{{ sources|length }}</span>
+          </summary>
+          {% for source in sources %}
+          <div class="source-row">
+            <div class="src-file"><i class="fas fa-file"></i> {{ source.file }}</div>
+            <p>"{{ source.text }}"</p>
+          </div>
+          {% endfor %}
+        </details>
+        {% endif %}
+
+      </div>
+      {% endif %}
+
     </div>
 
-    <!-- הצגת תוצאות הניתוח של ה-LLM -->
-    {% if result %}
-        <h2>דו''ח ניתוח אירוע (amazon.nova-micro)</h2>
-        <div class="result-box" style="white-space: pre-line;">
-            {{ result }}
-        </div>
-    {% endif %}
+    <!-- ═══ RIGHT: CONTROL PANEL ═══ -->
+    <div class="control-panel">
 
-    <!-- הצגת כרטיסי המקורות מתוך ה-Vector Store -->
-    {% if sources %}
-        <h2>מקורות מידע ואסמכתאות שולפו (Citations)</h2>
-        <div class="sources-grid">
-            {% for source in sources %}
-                <div class="source-card">
-                    <h3>מקור: <span>{{ source.file }}</span></h3>
-                    <p>"{{ source.text }}"</p>
-                </div>
-            {% endfor %}
+      <!-- Logo -->
+      <div class="cp-logo">
+        <div class="cp-shield"><i class="fas fa-shield-halved"></i></div>
+        <div class="cp-logo-text">
+          <div><span class="wm-s">Safe</span><span class="wm-sig">Signal</span></div>
+          <div class="wm-tag">Digital Resilience Assistant for Youth</div>
         </div>
-    {% endif %}
+      </div>
 
-    <footer>
-        <p>SafeSignal Project &copy; 2026 | מבוסס Amazon Bedrock Knowledge Base & Flask</p>
-    </footer>
+      <!-- Category cards -->
+      <div class="cat-cards">
+        <div class="cat-card card-1">
+          <div class="cc-icon"><i class="fas fa-triangle-exclamation"></i></div>
+          <div class="cc-text">
+            <strong>Category 1</strong>
+            <span>Suicide Risk — Immediate Action</span>
+          </div>
+        </div>
+        <div class="cat-card card-2">
+          <div class="cc-icon"><i class="fas fa-heart"></i></div>
+          <div class="cc-text">
+            <strong>Category 2</strong>
+            <span>Mental Distress — Help Required</span>
+          </div>
+        </div>
+        <div class="cat-card card-3">
+          <div class="cc-icon"><i class="fas fa-users"></i></div>
+          <div class="cc-text">
+            <strong>Category 3</strong>
+            <span>Cyberbullying — Identify &amp; Assist</span>
+          </div>
+        </div>
+      </div>
+
+      {% if error %}
+      <div class="form-error"><i class="fas fa-circle-exclamation"></i>{{ error }}</div>
+      {% endif %}
+
+      <!-- Scan form -->
+      <form method="POST" id="scanForm" class="scan-form">
+        <label for="user_text">Enter text, post or message to analyze:</label>
+        <textarea id="user_text" name="user_text"
+          placeholder="Paste a post, chat message or any suspicious text from the web..."
+          required>{% if original_text %}{{ original_text }}{% endif %}</textarea>
+        <button type="submit" class="scan-btn" id="scanBtn">
+          <span id="btnContent"><i class="fas fa-satellite-dish"></i> Run Scan &amp; Analysis</span>
+          <span class="btn-loading" id="btnLoading"><i class="fas fa-spinner fa-spin"></i> Analyzing... Please wait</span>
+        </button>
+      </form>
+
+      {% if not result %}
+      <div class="idle-hint"><p>Agent awaiting analysis</p></div>
+      {% endif %}
+
+      <!-- Agent info -->
+      <div class="agent-info">Agent: INDHHZGRD2 &nbsp;·&nbsp; Alias: E4SR5MTKOO</div>
+
+      <!-- History button -->
+      <a href="/history" class="history-btn">
+        <i class="fas fa-database"></i>
+        Recent Reports
+      </a>
+
+    </div>
+  </div>
 </div>
 
+<script>
+  const sweep  = document.getElementById('radarSweep');
+  const form   = document.getElementById('scanForm');
+  const FPS    = 60;
+  const PERIOD = 4000; // ms per full rotation
+  const STEP   = 360 / (PERIOD / (1000 / FPS)); // deg per frame
+
+  let angle    = parseFloat(localStorage.getItem('radarAngle') || '0');
+  let animFrame = null;
+  let spinning  = false;
+
+  // Restore last position on load
+  sweep.style.transform = `rotate(${angle}deg)`;
+
+  function tick() {
+    if (!spinning) return;
+    angle = (angle + STEP) % 360;
+    sweep.style.transform = `rotate(${angle}deg)`;
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  form.addEventListener('submit', function () {
+    document.getElementById('btnContent').style.display = 'none';
+    document.getElementById('btnLoading').style.display = 'flex';
+    document.getElementById('scanBtn').disabled = true;
+    spinning = true;
+    tick();
+  });
+
+  // Save angle before page unloads (form submit / refresh)
+  window.addEventListener('beforeunload', function () {
+    localStorage.setItem('radarAngle', angle.toFixed(2));
+  });
+
+  function applyStatus(id, ok) {
+    const dot = document.getElementById('dot-' + id);
+    const val = document.getElementById('val-' + id);
+    if (ok) {
+      dot.className = 'ss-dot';
+      val.className = 'ss-val';
+      val.textContent = id === 'email' ? 'SENT' : id === 'agent' ? 'CONNECTED' : 'ONLINE';
+    } else {
+      dot.className = 'ss-dot ss-dot-muted';
+      val.className = 'ss-val ss-val-muted';
+      val.textContent = id === 'email' ? 'STANDBY' : 'OFFLINE';
+    }
+    if (id === 'email' && ok) {
+      dot.className = 'ss-dot ss-dot-alert';
+      val.className = 'ss-val ss-val-alert';
+    }
+  }
+
+  function pollStatus() {
+    fetch('/status')
+      .then(r => r.json())
+      .then(d => {
+        applyStatus('ec2',   d.ec2);
+        applyStatus('agent', d.agent);
+        applyStatus('email', d.email);
+      })
+      .catch(() => {});
+  }
+
+  {% if alert_sent %}applyStatus('email', true);{% endif %}
+  pollStatus();
+  setInterval(pollStatus, 30000);
+</script>
 </body>
 </html>
