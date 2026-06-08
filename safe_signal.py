@@ -1,110 +1,200 @@
+import io
 import os
+import uuid
+import json
+import urllib.request
 import boto3
-from flask import Flask, render_template, request
+import pandas as pd
+from dotenv import load_dotenv
+load_dotenv()
+from flask import Flask, render_template, request, session as flask_session, jsonify, Response
+dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.secret_key = os.environ.get("SECRET_KEY", "safesignal-secret-key")
 
-KNOWLEDGE_BASE_ID = os.environ.get("KNOWLEDGE_BASE_ID", "GGJ7PMZUMP")
-MODEL_ARN = os.environ.get("MODEL_ARN", "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-micro-v1:0")
-
-bedrock_client = boto3.client(
-    service_name="bedrock-agent-runtime",
-    region_name="us-east-1"
-)
+AGENT_ID       = os.environ.get("AGENT_ID", "INDHHZGRD2")
+AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID", "E4SR5MTKOO")
+bedrock_runtime = boto3.client(service_name="bedrock-agent-runtime", region_name="us-east-1")
 
 GENERAL_KEYWORDS = ["בירת", "צרפת", "מתמטיקה", "תרגיל", "היסטוריה", "גאוגרפיה", "קוד פיתון", "תכנת לי"]
+
+
+def parse_agent_response(completion):
+    result_text   = ""
+    sources       = []
+    category      = None
+    lambda_called = False
+    history       = {}
+
+    for event in completion:
+        if "trace" in event:
+            trace = event["trace"].get("trace", {})
+            orch  = trace.get("orchestrationTrace", {})
+
+            inv = orch.get("invocationInput", {})
+            ag  = inv.get("actionGroupInvocationInput", {})
+            if ag:
+                func   = ag.get("function", "")
+                params = {p["name"]: p["value"] for p in ag.get("parameters", [])}
+                if func == "send_alert":
+                    lambda_called = True
+                    category = int(params.get("category", 2))
+                elif "category" in params and category is None:
+                    category = int(params.get("category", 2))
+
+            obs     = orch.get("observation", {})
+            ag_out  = obs.get("actionGroupInvocationOutput", {})
+            ag_text = ag_out.get("text", "")
+            if ag_text:
+                try:
+                    data = json.loads(ag_text)
+                    if "total" in data:
+                        history = data
+                except Exception:
+                    pass
+
+        chunk = event.get("chunk", {})
+        if "bytes" in chunk:
+            result_text += chunk["bytes"].decode("utf-8")
+        for citation in chunk.get("attribution", {}).get("citations", []):
+            for ref in citation.get("retrievedReferences", []):
+                s3_uri    = ref.get("location", {}).get("s3Location", {}).get("uri", "")
+                file_name = s3_uri.split("/")[-1] if s3_uri else "מקור מערכת"
+                text_chunk = ref.get("content", {}).get("text", "")
+                entry = {"file": file_name, "text": text_chunk}
+                if entry not in sources:
+                    sources.append(entry)
+
+    return result_text, sources, category, lambda_called, history
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         user_text = request.form.get("user_text", "").strip()
-        
+        user_id   = request.remote_addr or "anonymous"
+
         if not user_text:
             return render_template("index.html", error="אנא הזן טקסט לבדיקה.")
-            
+
         if any(keyword in user_text for keyword in GENERAL_KEYWORDS):
             return render_template(
-                "index.html", 
+                "index.html",
                 result="מצטער, המידע המבוקש אינו קיים במסמכי המערכת ואין לי אפשרות לענות על שאלות כלליות.",
-                sources=[],
-                original_text=user_text
-            )
-            
-        try:
-            custom_prompt = (
-                "אתה מערכת בינה מלאכותית מומחית ומצילת חיים בשם 'עוזר חוסן דיגיטלי לבני נוער'.\n"
-                "תפקידך לנתח את הטקסט החשוד שהוזן על ידי המשתמש (פוסט או תגובה מהרשת), להשוות אותו לסימני האזהרה, הקטגוריות ומדדי המצוקה הרשמיים המופיעים בהקשר (Context) שסופק לך, ולהפיק דוח הערכת סיכון ברור ומדויק קלינית בעברית.\n\n"
-                "חוקים נוקשים:\n"
-                "1. בצע ניתוח מעמיק בהסתמך אך ורק על מאגר הידע המצורף (משרד הבריאות, ער\"ן, מוקד 105).\n"
-                "2. קבע בבירור מהי רמת הסיכון החזויה (קריטית, גבוהה, בינונית, נמוכה).\n"
-                "3. אם רמת הסיכון היא 'קריטית' או 'גבוהה' (כמו ביטויי אובדנות ישירים/עקיפים או חרם קשה), ציין בשורה הראשונה במדויק ובאופן מפורש: \"[ALERT: TRUE]\".\n"
-                "4. ספק המלצות והפנה למוקדי התמיכה הרשמיים בישראל (ער\"ן 1201, מוקד 105) התואמים לקטגוריית המצוקה שנמצאה.\n"
-                "5. שמור על טון רשמי, מקצועי, ואובייקטיבי. אל תמציא נתונים או סימוכין שאינם בקונטקסט.\n\n"
-                "Context (מאגר ידע רשמי וסימני אזהרה):\n"
-                "$search_results$\n\n"
-                f"Suspicious Text / Post (הטקסט מהרשת לניתוח):\n"
-                f"{user_text}\n\n"
-                "הערכת סיכון ודוח ניתוח מקיף:"
+                sources=[], original_text=user_text
             )
 
-            response = bedrock_client.retrieve_and_generate(
-                input={'text': user_text},
-                retrieveAndGenerateConfiguration={
-                    'type': 'KNOWLEDGE_BASE',
-                    'knowledgeBaseConfiguration': {
-                        'knowledgeBaseId': KNOWLEDGE_BASE_ID,
-                        'modelArn': MODEL_ARN,
-                        'retrievalConfiguration': {
-                            'vectorSearchConfiguration': {
-                                'numberOfResults': 3
-                            }
-                        },
-                        'generationConfiguration': {
-                            'promptTemplate': {
-                                'textPromptTemplate': custom_prompt
-                            }
-                        }
-                    }
-                }
+        try:
+            if "session_id" not in flask_session:
+                flask_session["session_id"] = str(uuid.uuid4())
+            session_id = flask_session["session_id"]
+
+            # Pass user_id and session_id so the agent can forward them to log_incident
+            input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{user_text}"
+
+            response = bedrock_runtime.invoke_agent(
+                agentId=AGENT_ID,
+                agentAliasId=AGENT_ALIAS_ID,
+                sessionId=session_id,
+                inputText=input_text,
+                enableTrace=True
             )
-            
-            analysis_result = response.get("output", {}).get("text", "לא התקבלה תשובה מהמערכת.")
-            
-            # עיבוד מקורות מ-AWS Bedrock
-            sources = []
-            citations = response.get("citations", [])
-            for citation in citations:
-                for reference in citation.get("retrievedReferences", []):
-                    s3_uri = reference.get("location", {}).get("s3Location", {}).get("uri", "")
-                    file_name = s3_uri.split("/")[-1] if s3_uri else "מקור מערכת"
-                    text_chunk = reference.get("content", {}).get("text", "")
-                    
-                    if {"file": file_name, "text": text_chunk} not in sources:
-                        sources.append({"file": file_name, "text": text_chunk})
-            
-            # קריטי להגשה: מנגנון גיבוי (Fallback) במידה ורשימת הציטוטים חזרה ריקה מהענן
-            if not sources:
-                sources = [
-                    {
-                        "file": "MoH_Mental_Health_Protocols.pdf",
-                        "text": "נוהל משרד הבריאות לזיהוי סימני אזהרה דיגיטליים: ביטויים הכוללים רצון להיעלם, עייפות קיצונית מהחיים או רמיזות על 'היום האחרון' יסווגו כאירוע סיכון ברמה גבוהה/קריטית הדורש התערבות מיידית והפניה לקווי חירום."
-                    },
-                    {
-                        "file": "ERAN_Distress_Indicators.txt",
-                        "text": "מדדי ער\"ן לאותות מצוקה ברשת: בידוד חברתי, פוסטים בשעות מאוחרות המעידים על חוסר אונים, וקריאות עקיפות לעזרה ('אף אחד לא מבין', 'נמאס לי') מחייבים יצירת קשר והפניה למוקד 1201."
-                    },
-                    {
-                        "file": "Moked_105_Cyberbullying_Guide.pdf",
-                        "text": "מדריך מוקד 105 הלאומי להגנה על ילדים ברשת: זיהוי ביטויי חרם, דחייה חברתית חריפה, פגיעות חוזרות ונשנות בקבוצות צ'אט ואיומים ברשת יטופלו כאירוע פגיעה ברמת דחיפות עליונה."
-                    }
-                ]
-            
-            return render_template("index.html", result=analysis_result, sources=sources, original_text=user_text)
-            
+
+            result_text, sources, category, lambda_called, history = parse_agent_response(
+                response.get("completion", [])
+            )
+
+            if not result_text:
+                result_text = "לא התקבלה תשובה מהסוכן."
+
+            display_text = result_text.replace("[ALERT: TRUE]", "").replace("[ALERT:TRUE]", "").replace('\\"', '"').strip()
+
+            alert_sent = None
+            if lambda_called and category:
+                alert_sent = "נשלח מייל לגורמים הרלוונטיים"
+                flask_session["email_sent"] = True
+                flask_session.modified = True
+                print(f"*** [SafeSignal] ALERT — category {category} — user: {user_id} ***")
+
+            # Show count from PREVIOUS incidents only (subtract current one)
+            prev_total = max(0, history.get("total", 0) - 1)
+
+            return render_template("index.html",
+                result=display_text, sources=sources,
+                original_text=user_text, category=category,
+                alert_sent=alert_sent,
+                history_total=prev_total,
+                history_first=history.get("first_seen", ""))
+
         except Exception as e:
-            return render_template("index.html", error=f"שגיאה בתקשורת מול AWS Bedrock: {str(e)}")
+            return render_template("index.html", error=f"שגיאה בתקשורת מול AWS Bedrock Agent: {str(e)}")
 
     return render_template("index.html")
+
+
+@app.route("/status")
+def status():
+    ec2_ok = False
+    try:
+        req = urllib.request.urlopen(
+            "http://169.254.169.254/latest/meta-data/instance-id", timeout=1
+        )
+        ec2_ok = req.status == 200
+    except Exception:
+        pass
+
+    agent_ok = False
+    try:
+        client = boto3.client("bedrock-agent", region_name="us-east-1")
+        client.get_agent(agentId=AGENT_ID)
+        agent_ok = True
+    except Exception:
+        pass
+
+    return jsonify({
+        "ec2":   ec2_ok,
+        "agent": agent_ok,
+        "email": flask_session.get("email_sent", False)
+    })
+
+
+@app.route("/export-csv")
+def export_csv():
+    try:
+        table = dynamodb.Table("SafeSignalHistory")
+        items = table.scan().get("Items", [])
+    except Exception:
+        items = []
+
+    df = pd.DataFrame([{
+        "timestamp":    i.get("timestamp", ""),
+        "user_id":      i.get("user_id", ""),
+        "category":     i.get("category", ""),
+        "text_snippet": i.get("text_snippet", ""),
+        "session_id":   i.get("session_id", ""),
+    } for i in sorted(items, key=lambda x: x.get("timestamp", ""), reverse=True)])
+
+    buf = io.StringIO()
+    df.to_csv(buf, index=False, encoding="utf-8-sig")
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=safesignal_incidents.csv"}
+    )
+
+
+@app.route("/history")
+def history():
+    try:
+        table = dynamodb.Table("SafeSignalHistory")
+        resp  = table.scan()
+        items = sorted(resp.get("Items", []), key=lambda x: x.get("timestamp", ""), reverse=True)
+    except Exception:
+        items = []
+    return render_template("history.html", items=items)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
