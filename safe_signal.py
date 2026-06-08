@@ -87,11 +87,10 @@ def index():
             )
 
         try:
-            if "session_id" not in flask_session:
-                flask_session["session_id"] = str(uuid.uuid4())
-            session_id = flask_session["session_id"]
+            # Fresh session per request — prevents the agent from "remembering"
+            # it already sent alerts and skipping send_alert on repeat queries
+            session_id = str(uuid.uuid4())
 
-            # Pass user_id and session_id so the agent can forward them to log_incident
             input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{user_text}"
 
             response = bedrock_runtime.invoke_agent(

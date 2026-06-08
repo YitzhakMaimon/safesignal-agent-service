@@ -13,3 +13,6 @@ Thumbs.db
 
 alerts.log
 .claude/
+
+*.log
+

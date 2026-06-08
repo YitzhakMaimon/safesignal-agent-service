@@ -1,151 +1,200 @@
-# SafeSignal: Digital Resilience Assistant for Youth 🛡️🤖
+# SafeSignal — Digital Distress Detection System
 
-SafeSignal is an AI-powered web application designed to identify and assess potential signs of emotional distress, cyberbullying, social exclusion, and suicidal ideation in online content such as posts, comments, and chat messages.
+SafeSignal is an AI-powered web application that identifies and assesses signs of emotional distress, cyberbullying, social exclusion, and suicidal ideation in online content — posts, comments, and chat messages.
 
-Built as an end-to-end AI-augmented software solution, SafeSignal combines Retrieval-Augmented Generation (RAG) with official guidance from public support organizations to generate structured, evidence-grounded risk assessment reports. The system is intended to assist educators, social workers, support teams, and community organizations in identifying individuals who may require attention or intervention.
+The system is designed to assist educators, social workers, and community organizations in identifying individuals who may require attention or intervention.
 
-> **Disclaimer:** SafeSignal is designed as a decision-support system and does not provide medical diagnoses or replace professional mental health assessment or intervention.
-
----
-
-## 🚀 Key Features
-
-### Advanced RAG Architecture
-Connects seamlessly with Amazon Bedrock Knowledge Bases and vector-based retrieval systems to generate grounded assessments based on official guidance and trusted source documents.
-
-### HQ Operational Dashboard
-Features a cyber-inspired command center interface with responsive layouts, real-time monitoring visuals, animated system indicators, and streamlined report presentation.
-
-### Specialized Safety Guardrails
-Implements domain-specific filtering and validation mechanisms to keep the model focused on distress detection scenarios while reducing irrelevant responses and hallucinations.
-
-### Automated Threat Flagging (`[ALERT: TRUE]`)
-Highlights potentially critical situations when strong indicators of self-harm, suicidal ideation, severe distress, or cyberbullying are detected within the analyzed content.
-
-### Source Attribution & Fallback Logic
-Extracts supporting citations from retrieved knowledge base documents and presents them alongside generated assessments. Includes fallback guidance when retrieval results are unavailable or incomplete.
-
-### Containerized Deployment
-Fully Dockerized architecture enabling simple deployment, portability, and reproducible execution across environments.
+> **Disclaimer:** SafeSignal is a decision-support tool. It does not provide medical diagnoses and should not replace professional mental health assessment or emergency intervention.
 
 ---
 
-## 🛠️ Architecture & Technologies
+## Architecture Overview
 
+```
+User (Browser)
+     │ HTTP POST
+     ▼
+Flask App (safe_signal.py)
+     │ invoke_agent()
+     ▼
+Bedrock Agent (INDHHZGRD2 · alias E4SR5MTKOO)
+     │
+     ├── STEP 1 (always): RAG → Knowledge Base (S3 + OpenSearch)
+     │         retrieves official guidance documents
+     │
+     └── STEP 2 (conditional): Action Groups
+               ├── λ log_incident  → DynamoDB (SafeSignalHistory)
+               └── λ send_alert    → Amazon SES → email to responders
+```
 
-| Layer            | Technology              |
-| ---------------- | ----------------------- |
-| Backend          | Python 3.11, Flask      |
-| Frontend         | HTML5, CSS3, Jinja2     |
-| AI Engine        | Amazon Bedrock          |
-| RAG Service      | Bedrock Knowledge Bases |
-| Foundation Model | amazon.nova-micro-v1:0  |
-| Cloud SDK        | boto3                   |
-| Containerization | Docker, Docker Compose  |
+**Architecture rules:**
+1. Flask never invokes Lambda directly — only the Bedrock Agent triggers Lambdas via Action Groups
+2. The Agent always queries RAG first; only then decides whether to invoke Action Groups
+3. `log_incident` runs on every distress detection; `send_alert` runs for categories 1, 2, and 3
+4. `/history` reads DynamoDB directly via `boto3.scan()` — read-only, no Lambda needed
 
 ---
 
-## 🏗️ System Workflow
+## Distress Categories
 
-1. User submits online content (post, comment, message, or chat transcript).
-2. The system performs preliminary safety checks and risk indicator analysis.
-3. Relevant guidance is retrieved from the Amazon Bedrock Knowledge Base.
-4. The LLM generates a structured risk assessment report using retrieved evidence.
-5. Risk level is classified and emergency indicators are evaluated.
-6. Supporting sources and recommended actions are presented to the operator.
+| Category | Label | Action |
+|---|---|---|
+| **1** | Suicide Risk | Immediate action — ERAN 1201, MDA 101, Police 100 |
+| **2** | Mental Distress | Help required — ERAN 1201, MDA 101, Hotline 105 |
+| **3** | Cyberbullying | Identify & Assist — Hotline 105, Sahar, Police 100 |
+
+Each category triggers a `send_alert` Lambda → SES email to the configured responder, and displays a full support resources panel in the UI.
 
 ---
 
-## 📂 Project Structure
+## Key Features
 
-```text
-├── safe_signal.py         # Main Flask application and route handling
+- **Bedrock Agent + RAG** — Semantic retrieval from curated knowledge base documents (Ministry of Health, ERAN, Hotline 105) combined with agent-based orchestration
+- **3-tier distress classification** — Categories 1–3 with category-specific response banners and support resources
+- **Recurring distress detection** — Warns when a user has submitted 3+ distress posts (tracked in DynamoDB per `user_id`)
+- **Automated email alerts** — `send_alert` Lambda sends SES emails on every categorized incident
+- **Incident history** — `/history` page shows all logged incidents from DynamoDB
+- **Live status bar** — Polls `/status` every 30 seconds: EC2 connectivity, Bedrock Agent, Email Alert state
+- **Radar dashboard UI** — Cyber-themed interface with animated radar, category banners, and support resource panel
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.11, Flask |
+| Frontend | HTML5, CSS3, Jinja2 |
+| AI Orchestration | Amazon Bedrock Agent (Nova Micro) |
+| RAG | Bedrock Knowledge Base (S3 + OpenSearch) |
+| Incident Logging | AWS Lambda + DynamoDB |
+| Alert Delivery | AWS Lambda + Amazon SES |
+| Data Processing | pandas (CSV export), JSON |
+| Cloud SDK | boto3 |
+| Containerization | Docker, Docker Compose |
+
+---
+
+## Project Structure
+
+```
+├── safe_signal.py          # Flask app — agent invocation, trace parsing, routing
 ├── templates/
-│   └── index.html         # Dashboard interface and report rendering
+│   ├── index.html          # Main dashboard — radar, category banners, resources
+│   └── history.html        # Incident history page
 ├── static/
-│   └── style.css          # Styling, animations, and responsive layouts
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Container configuration
-└── docker-compose.yml     # Local deployment orchestration
+│   └── style.css           # Styling and animations
+├── architecture.html       # Interactive system flow diagram
+├── requirements.txt
+├── Dockerfile
+└── docker-compose.yml
 ```
 
 ---
 
-## ⚙️ Prerequisites
-
-Before running the application, ensure the following components are available:
-* Docker
-* Docker Compose
-* AWS Account with Amazon Bedrock access
-* Configured AWS credentials
-* Active Amazon Bedrock Knowledge Base containing approved guidance documents
-
----
-
-## 🔧 Environment Configuration
+## Environment Configuration
 
 Create a `.env` file in the project root:
 
 ```env
-AWS_ACCESS_KEY_ID=<YOUR_AWS_ACCESS_KEY>
-AWS_SECRET_ACCESS_KEY=<YOUR_AWS_SECRET_KEY>
+AWS_ACCESS_KEY_ID=<YOUR_KEY>
+AWS_SECRET_ACCESS_KEY=<YOUR_SECRET>
 
-KNOWLEDGE_BASE_ID=GGJ7PMZUMP
+AGENT_ID=INDHHZGRD2               # Replace with your own Bedrock Agent ID
+AGENT_ALIAS_ID=E4SR5MTKOO        # Replace with your production alias; use TSTALIASID only for testing
 
+KNOWLEDGE_BASE_ID=<YOUR_KB_ID>
 MODEL_ARN=arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-micro-v1:0
+
+ALERT_EMAIL=<RESPONDER_EMAIL>
+RESEND_API_KEY=<YOUR_RESEND_KEY>  # Used internally by the send_alert Lambda (not by Flask)
+SECRET_KEY=<FLASK_SESSION_SECRET>
 ```
+
+> **Important:** Always use `AGENT_ALIAS_ID=E4SR5MTKOO` (production alias) in deployment. The test alias (`TSTALIASID`) points to the DRAFT version and will reflect any in-progress edits in the Bedrock console immediately.
+
+> **Email delivery:** `RESEND_API_KEY` is stored in the Lambda's environment — not in Flask. The `send_alert` function is triggered **exclusively by the Bedrock Agent** via its Action Group. Flask never calls this Lambda directly and never sends email.
 
 ---
 
-## 🐳 Running the Application
+## Running the Application
 
-Build and launch the entire stack:
+### Prerequisites
+
+- Python 3.11+ (for local development)
+- Docker + Docker Compose (for containerized deployment)
+- An AWS account with Bedrock, DynamoDB, and SES configured (see [AWS Infrastructure](#aws-infrastructure))
+
+### 1. Configure environment variables
+
+Copy the template below into a `.env` file in the project root and fill in your values (see [Environment Configuration](#environment-configuration) for details):
+
+```env
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AGENT_ID=...
+AGENT_ALIAS_ID=...
+KNOWLEDGE_BASE_ID=...
+MODEL_ARN=arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-micro-v1:0
+ALERT_EMAIL=...
+RESEND_API_KEY=...
+SECRET_KEY=...
+```
+
+### 2a. Run with Docker (recommended)
 
 ```bash
 docker-compose up --build
 ```
 
-Once started, the application will be available at:
-```text
-http://localhost:5000
+### 2b. Run locally without Docker
+
+```bash
+pip install -r requirements.txt
+python safe_signal.py
 ```
 
----
+### 3. Open the app
 
-## 📊 Assessment Protocol
-
-For every submitted text, SafeSignal generates a structured report that may include:
-
-### Risk Classification
-* Critical
-* High
-* Medium
-* Low
-
-### Emergency Indicator
-```text
-[ALERT: TRUE]
-```
-Displayed when strong indicators of immediate risk are identified.
-
-### Evidence-Based Explanation
-Provides a concise justification supported by retrieved guidance and source references.
-
-### Support Recommendations
-Presents appropriate referral information and recommended next steps based on the identified category of concern.
+Visit `http://localhost:5000` in your browser.  
+The incident history is available at `http://localhost:5000/history`.
 
 ---
 
-## 🔒 Responsible AI Considerations
+## AWS Infrastructure
 
-SafeSignal follows a retrieval-grounded approach to reduce hallucinations and improve transparency. The system relies on curated guidance documents and provides source attribution whenever possible.
+> **Note:** The IDs below are example values from the reference deployment. Replace them with your own when deploying independently.
 
-The application is intended to support human decision-making and should not be used as the sole basis for emergency, medical, legal, or psychological decisions.
+| Resource | Name / ID |
+|---|---|
+| Bedrock Agent | `INDHHZGRD2` |
+| Production Alias | `E4SR5MTKOO` (alias-safesignal-user1) |
+| Lambda — logging | `safesignal-log-incident` |
+| Lambda — alerts | `safesignal-send-alert` |
+| Lambda — emergency | `safesignal-activate-emergency` |
+| DynamoDB Table | `SafeSignalHistory` |
+| SES Quota | 200 emails/day (sandbox), 1 msg/sec |
 
 ---
 
-## 👨‍💻 Author
+## Email Limits (SES)
 
-**Developed by:** Yitzhak Maimon
+The system uses Amazon SES (Sandbox mode):
+- **200 emails per 24 hours**
+- **1 email per second** max send rate
+- Emails can only be sent to verified addresses in sandbox mode
 
-Mid-Course Project – AI-Augmented Software Engineering Training
+---
+
+## Responsible AI
+
+SafeSignal uses retrieval-grounded generation to reduce hallucinations and improve transparency. All assessments are anchored to official guidance documents from the Israeli Ministry of Health, ERAN, and Hotline 105.
+
+The system is designed to support human decision-making and must not be used as the sole basis for emergency, medical, legal, or psychological decisions.
+
+---
+
+## Author
+
+**Developed by:** Yitzhak Maimon  
+Mid-Course Project — AI-Augmented Software Engineering Training
