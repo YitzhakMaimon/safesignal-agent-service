@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSignal — היסטוריית אירועים</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .history-page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        body { color: #e2e8f0; }
+        .history-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .history-header h1 i { color: #7c8cf8; }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: #273548; color: #e2e8f0; }
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            background: rgba(0,245,200,0.08);
+            border: 1px solid rgba(0,245,200,0.3);
+            border-radius: 8px;
+            color: #00f5c8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .export-btn:hover { background: rgba(0,245,200,0.16); }
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 140px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 18px 20px;
+            text-align: center;
+        }
+        .stat-card .stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-card .stat-label { font-size: 0.8rem; color: #64748b; }
+        .stat-card.cat1 .stat-num { color: #f87171; }
+        .stat-card.cat2 .stat-num { color: #fb923c; }
+        .stat-card.cat3 .stat-num { color: #a78bfa; }
+        .stat-card.total .stat-num { color: #7c8cf8; }
+        .incidents-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        .incidents-table th {
+            background: #0f172a;
+            color: #64748b;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 14px 16px;
+            text-align: right;
+        }
+        .incidents-table td {
+            padding: 13px 16px;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            border-top: 1px solid #1e293b;
+            vertical-align: middle;
+        }
+        .incidents-table tr:not(:first-child) td { border-top: 1px solid #273548; }
+        .incidents-table tr:hover td { background: #243044; }
+        .cat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-1 { background: rgba(248,113,113,0.15); color: #f87171; }
+        .badge-2 { background: rgba(251,146,60,0.15);  color: #fb923c; }
+        .badge-3 { background: rgba(167,139,250,0.15); color: #a78bfa; }
+        .badge-0 { background: rgba(100,116,139,0.15); color: #64748b; }
+        .snippet-cell {
+            max-width: 340px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #94a3b8;
+            font-size: 0.84rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #475569;
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; }
+    </style>
+</head>
+<body style="background: #0f172a; min-height: 100vh;">
+
+<div class="history-page">
+    <div class="history-header">
+        <h1><i class="fas fa-clock-rotate-left"></i> היסטוריית אירועים</h1>
+        <div style="display:flex; gap:10px;">
+            <a href="/export-csv" class="export-btn"><i class="fas fa-file-csv"></i> ייצוא CSV</a>
+            <a href="/" class="back-btn"><i class="fas fa-arrow-right"></i> חזרה למערכת</a>
+        </div>
+    </div>
+
+    {% set total = items|length %}
+    {% set cat1  = items|selectattr("category","equalto","1")|list|length %}
+    {% set cat2  = items|selectattr("category","equalto","2")|list|length %}
+    {% set cat3  = items|selectattr("category","equalto","3")|list|length %}
+
+    <div class="stats-row">
+        <div class="stat-card total">
+            <div class="stat-num">{{ total }}</div>
+            <div class="stat-label">סה"כ אירועים</div>
+        </div>
+        <div class="stat-card cat1">
+            <div class="stat-num">{{ cat1 }}</div>
+            <div class="stat-label">קטגוריה 1 — חירום</div>
+        </div>
+        <div class="stat-card cat2">
+            <div class="stat-num">{{ cat2 }}</div>
+            <div class="stat-label">קטגוריה 2 — מצוקה</div>
+        </div>
+        <div class="stat-card cat3">
+            <div class="stat-num">{{ cat3 }}</div>
+            <div class="stat-label">קטגוריה 3 — בריונות</div>
+        </div>
+    </div>
+
+    {% if items %}
+    <table class="incidents-table">
+        <thead>
+            <tr>
+                <th>זמן</th>
+                <th>משתמש (IP)</th>
+                <th>קטגוריה</th>
+                <th>טקסט שזוהה</th>
+                <th>Session</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td style="white-space:nowrap; color:#7c8cf8;">
+                    {{ item.timestamp[:19].replace("T"," ") if item.timestamp else "—" }}
+                </td>
+                <td style="font-family:monospace; font-size:0.82rem;">{{ item.user_id }}</td>
+                <td>
+                    {% if item.category == "1" %}
+                    <span class="cat-badge badge-1"><i class="fas fa-triangle-exclamation"></i> קטגוריה 1</span>
+                    {% elif item.category == "2" %}
+                    <span class="cat-badge badge-2"><i class="fas fa-heart"></i> קטגוריה 2</span>
+                    {% elif item.category == "3" %}
+                    <span class="cat-badge badge-3"><i class="fas fa-users"></i> קטגוריה 3</span>
+                    {% else %}
+                    <span class="cat-badge badge-0"><i class="fas fa-circle-check"></i> בטוח</span>
+                    {% endif %}
+                </td>
+                <td class="snippet-cell" title="{{ item.text_snippet }}">
+                    {{ item.text_snippet if item.text_snippet else "—" }}
+                </td>
+                <td style="font-family:monospace; font-size:0.75rem; color:#475569;">
+                    {{ item.session_id[:8] if item.session_id else "—" }}...
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-database"></i>
+        <p>אין אירועים רשומים עדיין</p>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
