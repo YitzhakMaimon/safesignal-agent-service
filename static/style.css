@@ -325,6 +325,12 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: fadeSlideIn 0.45s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .cat-banner {
