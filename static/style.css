@@ -524,6 +524,7 @@ body::before {
 .scan-form { display: flex; flex-direction: column; gap: 10px; }
 .scan-form label {
   font-size: 0.72rem; color: #3a5470; letter-spacing: 0.04em;
+  direction: ltr; text-align: left;
 }
 .scan-form textarea {
   background: rgba(10,22,44,0.8);
