@@ -118,6 +118,15 @@ def index():
                 result_text = "לא התקבלה תשובה מהסוכן."
 
             display_text = result_text.replace("[ALERT: TRUE]", "").replace("[ALERT:TRUE]", "").replace('\\"', '"').strip()
+            if not is_hebrew:
+                display_text = (display_text
+                    .replace('ער"ן', 'ERAN')
+                    .replace("ער''ן", 'ERAN')
+                    .replace('מד"א', 'MDA')
+                    .replace("מד''א", 'MDA')
+                    .replace('משטרה', 'Police')
+                    .replace('סהר', 'SAHAR')
+                )
 
             chat_history = flask_session.get("chat_history", [])
             chat_history.append(f"שאלה: {user_text}")
