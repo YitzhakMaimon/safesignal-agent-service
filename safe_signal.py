@@ -73,18 +73,18 @@ def parse_agent_response(completion):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         user_text = request.form.get("user_text", "").strip()
         user_id   = request.remote_addr or "anonymous"
 
         if not user_text:
+            if is_ajax: return jsonify({'error': 'אנא הזן טקסט לבדיקה.'})
             return render_template("index.html", error="אנא הזן טקסט לבדיקה.")
 
         if any(keyword in user_text for keyword in GENERAL_KEYWORDS):
-            return render_template(
-                "index.html",
-                result="מצטער, המידע המבוקש אינו קיים במסמכי המערכת ואין לי אפשרות לענות על שאלות כלליות.",
-                sources=[], original_text=user_text
-            )
+            msg = "מצטער, המידע המבוקש אינו קיים במסמכי המערכת ואין לי אפשרות לענות על שאלות כלליות."
+            if is_ajax: return jsonify({'result': msg, 'category': None, 'lang': 'he'})
+            return render_template("index.html", result=msg, sources=[], original_text=user_text)
 
         try:
             session_id = str(uuid.uuid4())
@@ -144,6 +144,15 @@ def index():
             # Show count from PREVIOUS incidents only (subtract current one)
             prev_total = max(0, history.get("total", 0) - 1)
 
+            if is_ajax:
+                return jsonify({
+                    'result':        display_text,
+                    'category':      category,
+                    'alert_sent':    alert_sent,
+                    'history_total': prev_total,
+                    'history_first': history.get("first_seen", ""),
+                    'lang':          "he" if is_hebrew else "en",
+                })
             return render_template("index.html",
                 result=display_text, sources=sources,
                 original_text=user_text, category=category,
@@ -153,6 +162,7 @@ def index():
                 lang="he" if is_hebrew else "en")
 
         except Exception as e:
+            if is_ajax: return jsonify({'error': f'שגיאה: {str(e)}'})
             return render_template("index.html", error=f"שגיאה בתקשורת מול AWS Bedrock Agent: {str(e)}")
 
     return render_template("index.html")

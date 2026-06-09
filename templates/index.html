@@ -253,12 +253,77 @@
     animFrame = requestAnimationFrame(tick);
   }
 
-  form.addEventListener('submit', function () {
+  // ── Bilingual resources data ──
+  const RES = {
+    he: {
+      title: 'משאבי תמיכה רלוונטיים',
+      1: [{n:'1201',l:'ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7'},{n:'101',l:'מד"א — חירום רפואי מיידי'},{n:'100',l:'משטרה — סכנת חיים מיידית'},{n:'105',l:'מוקד להגנה על ילדים ברשת'},{n:'sahar.org.il',l:'סהר — צ\'אט סיוע דיגיטלי אנונימי',site:true}],
+      2: [{n:'1201',l:'ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7'},{n:'101',l:'מד"א — חירום רפואי'},{n:'105',l:'מוקד להגנה על ילדים ברשת'},{n:'sahar.org.il',l:'סהר — צ\'אט סיוע דיגיטלי אנונימי',site:true}],
+      3: [{n:'105',l:'מוקד להגנה על ילדים ברשת — בריונות, שיימינג, הטרדה'},{n:'1201',l:'ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7'},{n:'100',l:'משטרה — איומים, סחיטה, עברות פליליות ברשת'},{n:'sahar.org.il',l:'סהר — צ\'אט סיוע דיגיטלי אנונימי',site:true}],
+    },
+    en: {
+      title: 'Relevant Support Resources',
+      1: [{n:'1201',l:'ERAN — Emotional support hotline, anonymous 24/7'},{n:'101',l:'MDA — Immediate medical emergency'},{n:'100',l:'Police — Immediate life threat'},{n:'105',l:'Child Online Protection Center'},{n:'sahar.org.il',l:'SAHAR — Anonymous digital support chat',site:true}],
+      2: [{n:'1201',l:'ERAN — Emotional support hotline, anonymous 24/7'},{n:'101',l:'MDA — Medical emergency'},{n:'105',l:'Child Online Protection Center'},{n:'sahar.org.il',l:'SAHAR — Anonymous digital support chat',site:true}],
+      3: [{n:'105',l:'Child Online Protection Center — bullying, shaming, harassment'},{n:'1201',l:'ERAN — Emotional support hotline, anonymous 24/7'},{n:'100',l:'Police — threats, extortion, online crimes'},{n:'sahar.org.il',l:'SAHAR — Anonymous digital support chat',site:true}],
+    }
+  };
+
+  function esc(s) { const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+
+  function renderResult(data) {
+    let h = '<div class="result-area">';
+    if (data.history_total > 3) {
+      h += `<div class="history-banner history-danger"><div class="hb-icon"><i class="fas fa-clock-rotate-left"></i></div><div><strong>Warning — Recurring Distress Pattern</strong><span>${esc(data.history_total)} distress posts detected &nbsp;·&nbsp; since ${esc(data.history_first)}</span></div></div>`;
+    }
+    const cats = {
+      1:{cls:'cat-1',icon:'fa-triangle-exclamation',title:'Category 1 — Suicide Risk',sub:'Immediate Action &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; MDA: <b>101</b>'},
+      2:{cls:'cat-2',icon:'fa-heart',title:'Category 2 — Mental Distress',sub:'Help Required &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; Hotline: <b>105</b>'},
+      3:{cls:'cat-3',icon:'fa-users',title:'Category 3 — Cyberbullying',sub:'Identify &amp; Assist &nbsp;·&nbsp; Hotline: <b>105</b>'},
+    };
+    if (data.category && cats[data.category]) {
+      const c = cats[data.category];
+      h += `<div class="cat-banner ${c.cls}"><div class="cb-icon"><i class="fas ${c.icon}"></i></div><div><strong>${c.title}</strong><span>${c.sub}</span></div></div>`;
+    }
+    if (data.alert_sent) {
+      h += `<div class="alert-sent-bar"><i class="fas fa-envelope-circle-check"></i>${esc(data.alert_sent)}</div>`;
+      applyStatus('email', true);
+    }
+    h += `<div class="result-text-box" dir="auto">${esc(data.result)}</div>`;
+    if (data.category) {
+      const lang = data.lang || 'he';
+      const rd = RES[lang]; const items = rd[data.category] || [];
+      const ltr = lang==='en' ? ' rb-ltr' : '';
+      h += `<div class="resources-block${ltr}"><div class="rb-title"><i class="fas fa-phone-volume"></i> ${rd.title}</div>`;
+      items.forEach(r => { h += `<div class="rb-line"><span class="rb-num${r.site?' rb-site':''}">${esc(r.n)}</span><span class="rb-label">${esc(r.l)}</span></div>`; });
+      h += '</div>';
+    }
+    h += '</div>';
+    document.querySelector('.result-panel').innerHTML = h;
+    document.querySelector('.main').classList.add('has-result');
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
     document.getElementById('btnContent').style.display = 'none';
     document.getElementById('btnLoading').style.display = 'flex';
     document.getElementById('scanBtn').disabled = true;
-    spinning = true;
-    tick();
+    spinning = true; tick();
+    try {
+      const res = await fetch('/', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest'}, body: new FormData(form)});
+      const data = await res.json();
+      if (data.error) {
+        document.querySelector('.result-panel').innerHTML = `<div class="form-error"><i class="fas fa-circle-exclamation"></i>${esc(data.error)}</div>`;
+      } else {
+        renderResult(data);
+      }
+    } catch(err) { form.submit(); }
+    finally {
+      document.getElementById('btnContent').style.display = '';
+      document.getElementById('btnLoading').style.display = 'none';
+      document.getElementById('scanBtn').disabled = false;
+      spinning = false;
+    }
   });
 
   // Save angle before page unloads (form submit / refresh)
