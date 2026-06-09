@@ -171,7 +171,7 @@ The incident history is available at `http://localhost:5000/history`.
 | Production Alias | `E4SR5MTKOO` (alias-safesignal-user1) |
 | Lambda — logging | `safesignal-log-incident` |
 | Lambda — alerts | `safesignal-send-alert` |
-| Lambda — emergency | `safesignal-activate-emergency` |
+| Lambda — emergency | `safesignal-activate-emergency` *(planned — future development)* |
 | DynamoDB Table | `SafeSignalHistory` |
 | SES Quota | 200 emails/day (sandbox), 1 msg/sec |
 
