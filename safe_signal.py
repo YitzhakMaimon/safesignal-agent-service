@@ -99,11 +99,8 @@ def index():
             if history_lines:
                 history_context = "היסטוריית שיחה:\n" + "\n".join(history_lines[-6:]) + "\n\n"
 
-            if is_hebrew:
-                lang_prefix = "הוראה קריטית: המשתמש פנה בעברית. כל תשובתך חייבת להיות בעברית בלבד. אל תכתוב אפילו מילה אחת באנגלית.\n\n"
-            else:
-                lang_prefix = "CRITICAL INSTRUCTION: The user wrote in English. Your entire response MUST be in English only. Do not write a single word in Hebrew.\n\n"
-            input_text = f"{lang_prefix}[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}"
+            lang_note = "\n[ענה בעברית בלבד]" if is_hebrew else "\n[Respond in English only]"
+            input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}{lang_note}"
 
             response = bedrock_runtime.invoke_agent(
                 agentId=AGENT_ID,
