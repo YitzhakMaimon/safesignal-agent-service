@@ -99,7 +99,9 @@ def index():
             if history_lines:
                 history_context = "היסטוריית שיחה:\n" + "\n".join(history_lines[-6:]) + "\n\n"
 
-            lang_note = "\n[ענה בעברית בלבד]" if is_hebrew else "\n[Respond in English only]"
+            lang_note = ("\n\n[הנחיית מערכת: נתח את ההודעה לעיל לפי פרוטוקול SafeSignal. ענה בעברית בלבד.]"
+                         if is_hebrew else
+                         "\n\n[System instruction: Analyze the message above per SafeSignal protocol. Your entire response MUST be in English only — do not use Hebrew.]")
             input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}{lang_note}"
 
             response = bedrock_runtime.invoke_agent(
