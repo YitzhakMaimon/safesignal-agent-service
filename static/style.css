@@ -297,12 +297,13 @@ body::before {
 
 /* ── Status bar ── */
 .status-bar {
-  position: absolute;
+  position: fixed;
   bottom: 14px;
   left: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  z-index: 10;
 }
 .ss-item {
   font-size: 0.82rem; color: #6bb88a;
