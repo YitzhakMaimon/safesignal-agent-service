@@ -81,9 +81,14 @@ def index():
             if is_ajax: return jsonify({'error': 'אנא הזן טקסט לבדיקה.'})
             return render_template("index.html", error="אנא הזן טקסט לבדיקה.")
 
+        hebrew_chars = sum(1 for c in user_text if '֐' <= c <= '׿')
+        is_hebrew = hebrew_chars > len(user_text) * 0.2
+
         if any(keyword in user_text for keyword in GENERAL_KEYWORDS):
-            msg = "מצטער, המידע המבוקש אינו קיים במסמכי המערכת ואין לי אפשרות לענות על שאלות כלליות."
-            if is_ajax: return jsonify({'result': msg, 'category': None, 'lang': 'he'})
+            msg = ("מצטער, המידע המבוקש אינו קיים במסמכי המערכת ואין לי אפשרות לענות על שאלות כלליות."
+                   if is_hebrew else
+                   "Sorry, I can only analyze distress-related content. I'm not able to answer general questions.")
+            if is_ajax: return jsonify({'result': msg, 'category': None, 'lang': 'he' if is_hebrew else 'en'})
             return render_template("index.html", result=msg, sources=[], original_text=user_text)
 
         try:
@@ -94,12 +99,10 @@ def index():
             if history_lines:
                 history_context = "היסטוריית שיחה:\n" + "\n".join(history_lines[-6:]) + "\n\n"
 
-            hebrew_chars = sum(1 for c in user_text if '֐' <= c <= '׿')
-            is_hebrew = hebrew_chars > len(user_text) * 0.2
             if is_hebrew:
-                lang_prefix = ""
+                lang_prefix = "הוראה קריטית: המשתמש פנה בעברית. כל תשובתך חייבת להיות בעברית בלבד. אל תכתוב אפילו מילה אחת באנגלית.\n\n"
             else:
-                lang_prefix = "CRITICAL INSTRUCTION: The user wrote in English. Your entire response MUST be in English only. Do not write a single word in Hebrew. Respond in English.\n\n"
+                lang_prefix = "CRITICAL INSTRUCTION: The user wrote in English. Your entire response MUST be in English only. Do not write a single word in Hebrew.\n\n"
             input_text = f"{lang_prefix}[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}"
 
             response = bedrock_runtime.invoke_agent(
