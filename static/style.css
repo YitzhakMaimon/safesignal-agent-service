@@ -404,6 +404,12 @@ body::before {
 .rb-num.rb-site { font-size: 0.75rem; color: var(--accent); }
 .rb-label { font-size: 0.78rem; color: #b0c8d8; line-height: 1.4; text-align: right; }
 
+.rb-ltr { direction: ltr; }
+.rb-ltr .rb-title { direction: ltr; text-align: left; }
+.rb-ltr .rb-line { direction: ltr; justify-content: flex-start; }
+.rb-ltr .rb-num { text-align: left; }
+.rb-ltr .rb-label { text-align: left; }
+
 /* Sources */
 .sources-block {
   margin-top: 10px;

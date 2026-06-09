@@ -77,7 +77,7 @@
         <div class="result-text-box" dir="auto">{{ result }}</div>
 
         {% if category %}
-        <div class="resources-block">
+        <div class="resources-block{% if lang == 'en' %} rb-ltr{% endif %}">
           <div class="rb-title"><i class="fas fa-phone-volume"></i> {% if lang == 'en' %}Relevant Support Resources{% else %}משאבי תמיכה רלוונטיים{% endif %}</div>
           {% if category == 1 %}
             {% if lang == 'en' %}
