@@ -186,10 +186,20 @@ def export_csv():
 
 @app.route("/history")
 def history():
+    from datetime import datetime, timezone, timedelta
+    IL = timezone(timedelta(hours=3))
     try:
         table = dynamodb.Table("SafeSignalHistory")
         resp  = table.scan()
         items = sorted(resp.get("Items", []), key=lambda x: x.get("timestamp", ""), reverse=True)
+        for item in items:
+            ts = item.get("timestamp", "")
+            if ts:
+                try:
+                    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    item["timestamp"] = dt.astimezone(IL).strftime("%Y-%m-%dT%H:%M:%S")
+                except Exception:
+                    pass
     except Exception:
         items = []
     return render_template("history.html", items=items)
