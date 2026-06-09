@@ -96,8 +96,11 @@ def index():
 
             hebrew_chars = sum(1 for c in user_text if '֐' <= c <= '׿')
             is_hebrew = hebrew_chars > len(user_text) * 0.2
-            lang_note = "חובה לענות בעברית." if is_hebrew else "You MUST respond in English only."
-            input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}\n\n[{lang_note}]"
+            if is_hebrew:
+                lang_prefix = ""
+            else:
+                lang_prefix = "CRITICAL INSTRUCTION: The user wrote in English. Your entire response MUST be in English only. Do not write a single word in Hebrew. Respond in English.\n\n"
+            input_text = f"{lang_prefix}[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}"
 
             response = bedrock_runtime.invoke_agent(
                 agentId=AGENT_ID,
