@@ -50,13 +50,28 @@ body::before {
    ══════════════════════════════ */
 .titlebar {
   display: flex; align-items: center;
-  justify-content: space-between;
+  direction: ltr;
   padding: 0 28px;
   height: 48px;
   background: rgba(6,13,26,0.95);
   border-bottom: 1px solid rgba(0,245,200,0.12);
   flex-shrink: 0;
 }
+.tb-logo {
+  display: flex; align-items: center; gap: 8px;
+}
+.tb-logo .cp-shield {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, rgba(0,100,180,0.6), rgba(0,60,120,0.8));
+  border: 1px solid rgba(0,245,200,0.3);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(0,200,180,0.15);
+}
+.tb-logo .wm-s   { font-size: 1rem; font-weight: 800; color: #e2e8f0; }
+.tb-logo .wm-sig { font-size: 1rem; font-weight: 800; color: var(--teal); }
+
 .tb-dots { display: flex; gap: 7px; }
 .tb-dot  { width: 12px; height: 12px; border-radius: 50%; }
 .tb-dot.r { background: #ff5f57; }
@@ -520,7 +535,6 @@ body::before {
   resize: none; height: 110px;
   outline: none;
   transition: border-color 0.2s;
-  direction: rtl;
 }
 .scan-form textarea:focus {
   border-color: rgba(0,245,200,0.45);

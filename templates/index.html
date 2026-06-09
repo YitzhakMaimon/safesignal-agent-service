@@ -15,16 +15,13 @@
 
   <!-- ═══ TITLEBAR ═══ -->
   <div class="titlebar">
-    <div class="tb-dots">
-      <div class="tb-dot r"></div>
-      <div class="tb-dot y"></div>
-      <div class="tb-dot g"></div>
+    <div class="tb-logo">
+      <div class="cp-shield"><i class="fas fa-shield-halved"></i></div>
+      <div><span class="wm-s">Safe</span><span class="wm-sig">Signal</span></div>
     </div>
     <div class="tb-title">
-      <i class="fas fa-shield-halved"></i>
       SafeSignal &mdash; Digital Distress Detection System
     </div>
-
   </div>
 
   <!-- ═══ MAIN ═══ -->
@@ -157,14 +154,6 @@
     <!-- ═══ RIGHT: CONTROL PANEL ═══ -->
     <div class="control-panel">
 
-      <!-- Logo -->
-      <div class="cp-logo">
-        <div class="cp-shield"><i class="fas fa-shield-halved"></i></div>
-        <div class="cp-logo-text">
-          <div><span class="wm-s">Safe</span><span class="wm-sig">Signal</span></div>
-        </div>
-      </div>
-
       <!-- Category cards -->
       <div class="cat-cards">
         <div class="cat-card card-1">
@@ -197,7 +186,7 @@
       <!-- Scan form -->
       <form method="POST" id="scanForm" class="scan-form">
         <label for="user_text">Enter text, post or message to analyze:</label>
-        <textarea id="user_text" name="user_text"
+        <textarea id="user_text" name="user_text" dir="auto"
           placeholder="Paste a post, chat message or any suspicious text from the web..."
           required></textarea>
         <button type="submit" class="scan-btn" id="scanBtn">
