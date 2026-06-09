@@ -136,7 +136,7 @@ def index():
 
             alert_sent = None
             if lambda_called and category:
-                alert_sent = "נשלח מייל לגורמים הרלוונטיים"
+                alert_sent = "נשלח מייל לגורמים הרלוונטיים" if is_hebrew else "Alert email sent to relevant authorities"
                 flask_session["email_sent"] = True
                 flask_session.modified = True
                 print(f"*** [SafeSignal] ALERT — category {category} — user: {user_id} ***")
