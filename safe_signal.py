@@ -87,11 +87,14 @@ def index():
             )
 
         try:
-            if "session_id" not in flask_session:
-                flask_session["session_id"] = str(uuid.uuid4())
-            session_id = flask_session["session_id"]
+            session_id = str(uuid.uuid4())
 
-            input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{user_text}"
+            history_lines = flask_session.get("chat_history", [])
+            history_context = ""
+            if history_lines:
+                history_context = "היסטוריית שיחה:\n" + "\n".join(history_lines[-6:]) + "\n\n"
+
+            input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{history_context}{user_text}"
 
             response = bedrock_runtime.invoke_agent(
                 agentId=AGENT_ID,
@@ -109,6 +112,12 @@ def index():
                 result_text = "לא התקבלה תשובה מהסוכן."
 
             display_text = result_text.replace("[ALERT: TRUE]", "").replace("[ALERT:TRUE]", "").replace('\\"', '"').strip()
+
+            chat_history = flask_session.get("chat_history", [])
+            chat_history.append(f"שאלה: {user_text}")
+            chat_history.append(f"תשובה: {display_text[:200]}")
+            flask_session["chat_history"] = chat_history[-12:]
+            flask_session.modified = True
 
             alert_sent = None
             if lambda_called and category:
