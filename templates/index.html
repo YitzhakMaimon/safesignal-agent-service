@@ -25,124 +25,10 @@
   </div>
 
   <!-- ═══ MAIN ═══ -->
-  <div class="main{% if result %} has-result{% endif %}">
+  <div class="main">
 
-    <!-- ═══ LEFT: RESULTS ═══ -->
-    <div class="result-panel">
-      {% if result %}
-      <div class="result-area">
-
-        {% if history_total and history_total > 3 %}
-        <div class="history-banner history-danger">
-          <div class="hb-icon"><i class="fas fa-clock-rotate-left"></i></div>
-          <div>
-            <strong>Warning — Recurring Distress Pattern</strong>
-            <span><bdi>{{ history_total }}</bdi> distress posts detected &nbsp;·&nbsp; since <bdi>{{ history_first }}</bdi></span>
-          </div>
-        </div>
-        {% endif %}
-
-        {% if category == 1 %}
-        <div class="cat-banner cat-1">
-          <div class="cb-icon"><i class="fas fa-triangle-exclamation"></i></div>
-          <div>
-            <strong>Category 1 — Suicide Risk</strong>
-            <span>Immediate Action &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; MDA: <b>101</b></span>
-          </div>
-        </div>
-        {% elif category == 2 %}
-        <div class="cat-banner cat-2">
-          <div class="cb-icon"><i class="fas fa-heart"></i></div>
-          <div>
-            <strong>Category 2 — Mental Distress</strong>
-            <span>Help Required &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; Hotline: <b>105</b></span>
-          </div>
-        </div>
-        {% elif category == 3 %}
-        <div class="cat-banner cat-3">
-          <div class="cb-icon"><i class="fas fa-users"></i></div>
-          <div>
-            <strong>Category 3 — Cyberbullying</strong>
-            <span>Identify &amp; Assist &nbsp;·&nbsp; Hotline: <b>105</b></span>
-          </div>
-        </div>
-        {% endif %}
-
-        {% if alert_sent %}
-        <div class="alert-sent-bar">
-          <i class="fas fa-envelope-circle-check"></i>{{ alert_sent }}
-        </div>
-        {% endif %}
-
-        <div class="result-text-box" dir="auto">{{ result }}</div>
-
-        {% if category %}
-        <div class="resources-block{% if lang == 'en' %} rb-ltr{% endif %}">
-          <div class="rb-title"><i class="fas fa-phone-volume"></i> {% if lang == 'en' %}Relevant Support Resources{% else %}משאבי תמיכה רלוונטיים{% endif %}</div>
-          {% if category == 1 %}
-            {% if lang == 'en' %}
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Immediate medical emergency</span></div>
-          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — Immediate life threat</span></div>
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
-            {% else %}
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי מיידי</span></div>
-          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — סכנת חיים מיידית</span></div>
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
-            {% endif %}
-          {% elif category == 2 %}
-            {% if lang == 'en' %}
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Medical emergency</span></div>
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
-            {% else %}
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי</span></div>
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
-            {% endif %}
-          {% elif category == 3 %}
-            {% if lang == 'en' %}
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center — bullying, shaming, harassment</span></div>
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — threats, extortion, online crimes</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
-            {% else %}
-          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת — בריונות, שיימינג, הטרדה</span></div>
-          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
-          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — איומים, סחיטה, עברות פליליות ברשת</span></div>
-          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
-            {% endif %}
-          {% endif %}
-        </div>
-        {% endif %}
-
-        {% if sources %}
-        <details class="sources-block">
-          <summary class="sources-heading">
-            <i class="fas fa-book-open"></i> Sources
-            <span class="src-count">{{ sources|length }}</span>
-          </summary>
-          {% for source in sources %}
-          <div class="source-row">
-            <div class="src-file"><i class="fas fa-file"></i> {{ source.file }}</div>
-            <p>"{{ source.text }}"</p>
-          </div>
-          {% endfor %}
-        </details>
-        {% endif %}
-
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- ═══ CENTER: RADAR ═══ -->
+    <!-- ═══ LEFT: RADAR ═══ -->
     <div class="radar-section">
-
       <div class="radar-wrap">
         <div class="radar-base"></div>
         <div class="radar-glow"></div>
@@ -170,13 +56,36 @@
           <span class="ss-val ss-val-muted" id="val-agent">CHECKING</span>
         </div>
       </div>
+    </div>
+
+    <!-- ═══ CENTER: INPUT ═══ -->
+    <div class="center-panel">
+
+      <div class="center-title">
+        <div class="ct-icon"><i class="fas fa-shield-halved"></i></div>
+        <h1>Paste text to detect<br>digital distress</h1>
+        <p>Analyze social media posts, messages, and online content for warning signs</p>
+      </div>
+
+      {% if error %}
+      <div class="form-error"><i class="fas fa-circle-exclamation"></i>{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" id="scanForm" class="scan-form">
+        <textarea id="user_text" name="user_text" dir="auto"
+          placeholder="Paste a post, chat message or any suspicious text from the web..."
+          required></textarea>
+        <button type="submit" class="scan-btn" id="scanBtn">
+          <span id="btnContent"><i class="fas fa-satellite-dish"></i> Run Scan &amp; Analysis</span>
+          <span class="btn-loading" id="btnLoading"><i class="fas fa-spinner fa-spin"></i> Analyzing... Please wait</span>
+        </button>
+      </form>
 
     </div>
 
-    <!-- ═══ RIGHT: CONTROL PANEL ═══ -->
-    <div class="control-panel">
+    <!-- ═══ RIGHT: CATEGORIES + RESULTS ═══ -->
+    <div class="right-panel">
 
-      <!-- Category cards -->
       <div class="cat-cards">
         <div class="cat-card card-1">
           <div class="cc-icon"><i class="fas fa-triangle-exclamation"></i></div>
@@ -201,28 +110,86 @@
         </div>
       </div>
 
-      {% if error %}
-      <div class="form-error"><i class="fas fa-circle-exclamation"></i>{{ error }}</div>
-      {% endif %}
+      <div id="resultArea">
+        {% if result %}
+        <div class="result-area">
 
-      <!-- Scan form -->
-      <form method="POST" id="scanForm" class="scan-form">
-        <label for="user_text">Enter text, post or message to analyze:</label>
-        <textarea id="user_text" name="user_text" dir="auto"
-          placeholder="Paste a post, chat message or any suspicious text from the web..."
-          required></textarea>
-        <button type="submit" class="scan-btn" id="scanBtn">
-          <span id="btnContent"><i class="fas fa-satellite-dish"></i> Run Scan &amp; Analysis</span>
-          <span class="btn-loading" id="btnLoading"><i class="fas fa-spinner fa-spin"></i> Analyzing... Please wait</span>
-        </button>
-      </form>
+          {% if history_total and history_total > 3 %}
+          <div class="history-banner history-danger">
+            <div class="hb-icon"><i class="fas fa-clock-rotate-left"></i></div>
+            <div>
+              <strong>Warning — Recurring Distress Pattern</strong>
+              <span><bdi>{{ history_total }}</bdi> distress posts detected &nbsp;·&nbsp; since <bdi>{{ history_first }}</bdi></span>
+            </div>
+          </div>
+          {% endif %}
 
-      {% if not result %}
-      <div class="idle-hint"><p>Agent awaiting analysis</p></div>
-      {% endif %}
+          {% if category == 1 %}
+          <div class="cat-banner cat-1">
+            <div class="cb-icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <div><strong>Category 1 — Suicide Risk</strong><span>Immediate Action &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; MDA: <b>101</b></span></div>
+          </div>
+          {% elif category == 2 %}
+          <div class="cat-banner cat-2">
+            <div class="cb-icon"><i class="fas fa-heart"></i></div>
+            <div><strong>Category 2 — Mental Distress</strong><span>Help Required &nbsp;·&nbsp; ERAN: <b>1201</b> &nbsp;·&nbsp; Hotline: <b>105</b></span></div>
+          </div>
+          {% elif category == 3 %}
+          <div class="cat-banner cat-3">
+            <div class="cb-icon"><i class="fas fa-users"></i></div>
+            <div><strong>Category 3 — Cyberbullying</strong><span>Identify &amp; Assist &nbsp;·&nbsp; Hotline: <b>105</b></span></div>
+          </div>
+          {% endif %}
 
+          {% if alert_sent %}
+          <div class="alert-sent-bar"><i class="fas fa-envelope-circle-check"></i>{{ alert_sent }}</div>
+          {% endif %}
 
-<!-- History button -->
+          <div class="result-text-box" dir="auto">{{ result }}</div>
+
+          {% if category %}
+          <div class="resources-block{% if lang == 'en' %} rb-ltr{% endif %}">
+            <div class="rb-title"><i class="fas fa-phone-volume"></i> {% if lang == 'en' %}Relevant Support Resources{% else %}משאבי תמיכה רלוונטיים{% endif %}</div>
+            {% if category == 1 %}{% if lang == 'en' %}
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Immediate medical emergency</span></div>
+            <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — Immediate life threat</span></div>
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי מיידי</span></div>
+            <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — סכנת חיים מיידית</span></div>
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}{% elif category == 2 %}{% if lang == 'en' %}
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Medical emergency</span></div>
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי</span></div>
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}{% elif category == 3 %}{% if lang == 'en' %}
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center — bullying, shaming, harassment</span></div>
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — threats, extortion, online crimes</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
+            <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת — בריונות, שיימינג, הטרדה</span></div>
+            <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
+            <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — איומים, סחיטה, עברות פליליות ברשת</span></div>
+            <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}{% endif %}
+          </div>
+          {% endif %}
+
+        </div>
+        {% endif %}
+      </div>
+
       <a href="/history" class="history-btn">
         <i class="fas fa-database"></i>
         Recent Reports
@@ -236,14 +203,13 @@
   const sweep  = document.getElementById('radarSweep');
   const form   = document.getElementById('scanForm');
   const FPS    = 60;
-  const PERIOD = 4000; // ms per full rotation
-  const STEP   = 360 / (PERIOD / (1000 / FPS)); // deg per frame
+  const PERIOD = 4000;
+  const STEP   = 360 / (PERIOD / (1000 / FPS));
 
   let angle    = parseFloat(localStorage.getItem('radarAngle') || '0');
   let animFrame = null;
   let spinning  = false;
 
-  // Restore last position on load
   sweep.style.transform = `rotate(${angle}deg)`;
 
   function tick() {
@@ -252,6 +218,44 @@
     sweep.style.transform = `rotate(${angle}deg)`;
     animFrame = requestAnimationFrame(tick);
   }
+
+  window.addEventListener('beforeunload', function () {
+    localStorage.setItem('radarAngle', angle.toFixed(2));
+  });
+
+  function applyStatus(id, ok) {
+    const dot = document.getElementById('dot-' + id);
+    const val = document.getElementById('val-' + id);
+    if (!dot || !val) return;
+    if (ok) {
+      dot.className = 'ss-dot';
+      val.className = 'ss-val';
+      val.textContent = id === 'email' ? 'SENT' : id === 'agent' ? 'CONNECTED' : 'ONLINE';
+    } else {
+      dot.className = 'ss-dot ss-dot-muted';
+      val.className = 'ss-val ss-val-muted';
+      val.textContent = id === 'email' ? 'STANDBY' : 'OFFLINE';
+    }
+    if (id === 'email' && ok) {
+      dot.className = 'ss-dot ss-dot-alert';
+      val.className = 'ss-val ss-val-alert';
+    }
+  }
+
+  function pollStatus() {
+    fetch('/status')
+      .then(r => r.json())
+      .then(d => {
+        applyStatus('ec2',   d.ec2);
+        applyStatus('agent', d.agent);
+        applyStatus('email', d.email);
+      })
+      .catch(() => {});
+  }
+
+  {% if alert_sent %}applyStatus('email', true);{% endif %}
+  pollStatus();
+  setInterval(pollStatus, 30000);
 
   // ── Bilingual resources data ──
   const RES = {
@@ -299,8 +303,7 @@
       h += '</div>';
     }
     h += '</div>';
-    document.querySelector('.result-panel').innerHTML = h;
-    document.querySelector('.main').classList.add('has-result');
+    document.getElementById('resultArea').innerHTML = h;
   }
 
   form.addEventListener('submit', async function(e) {
@@ -317,12 +320,13 @@
       }
       const data = await res.json();
       if (data.error) {
-        document.querySelector('.result-panel').innerHTML = `<div class="form-error"><i class="fas fa-circle-exclamation"></i>${esc(data.error)}</div>`;
+        document.getElementById('resultArea').innerHTML =
+          `<div class="form-error"><i class="fas fa-circle-exclamation"></i>${esc(data.error)}</div>`;
       } else {
         renderResult(data);
       }
     } catch(err) {
-      document.querySelector('.result-panel').innerHTML =
+      document.getElementById('resultArea').innerHTML =
         `<div class="form-error"><i class="fas fa-circle-exclamation"></i>שגיאת תקשורת: ${esc(err.message)}</div>`;
     } finally {
       document.getElementById('btnContent').style.display = '';
@@ -331,45 +335,6 @@
       spinning = false;
     }
   });
-
-  // Save angle before page unloads (form submit / refresh)
-  window.addEventListener('beforeunload', function () {
-    localStorage.setItem('radarAngle', angle.toFixed(2));
-  });
-
-  function applyStatus(id, ok) {
-    const dot = document.getElementById('dot-' + id);
-    const val = document.getElementById('val-' + id);
-    if (!dot || !val) return;
-    if (ok) {
-      dot.className = 'ss-dot';
-      val.className = 'ss-val';
-      val.textContent = id === 'email' ? 'SENT' : id === 'agent' ? 'CONNECTED' : 'ONLINE';
-    } else {
-      dot.className = 'ss-dot ss-dot-muted';
-      val.className = 'ss-val ss-val-muted';
-      val.textContent = id === 'email' ? 'STANDBY' : 'OFFLINE';
-    }
-    if (id === 'email' && ok) {
-      dot.className = 'ss-dot ss-dot-alert';
-      val.className = 'ss-val ss-val-alert';
-    }
-  }
-
-  function pollStatus() {
-    fetch('/status')
-      .then(r => r.json())
-      .then(d => {
-        applyStatus('ec2',   d.ec2);
-        applyStatus('agent', d.agent);
-        applyStatus('email', d.email);
-      })
-      .catch(() => {});
-  }
-
-  {% if alert_sent %}applyStatus('email', true);{% endif %}
-  pollStatus();
-  setInterval(pollStatus, 30000);
 </script>
 </body>
 </html>
