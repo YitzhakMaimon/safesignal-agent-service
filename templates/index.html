@@ -317,8 +317,10 @@
       } else {
         renderResult(data);
       }
-    } catch(err) { form.submit(); }
-    finally {
+    } catch(err) {
+      document.querySelector('.result-panel').innerHTML =
+        `<div class="form-error"><i class="fas fa-circle-exclamation"></i>שגיאת תקשורת: ${esc(err.message)}</div>`;
+    } finally {
       document.getElementById('btnContent').style.display = '';
       document.getElementById('btnLoading').style.display = 'none';
       document.getElementById('scanBtn').disabled = false;
