@@ -149,7 +149,8 @@ def index():
                 original_text=user_text, category=category,
                 alert_sent=alert_sent,
                 history_total=prev_total,
-                history_first=history.get("first_seen", ""))
+                history_first=history.get("first_seen", ""),
+                lang="he" if is_hebrew else "en")
 
         except Exception as e:
             return render_template("index.html", error=f"שגיאה בתקשורת מול AWS Bedrock Agent: {str(e)}")

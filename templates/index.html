@@ -78,23 +78,45 @@
 
         {% if category %}
         <div class="resources-block">
-          <div class="rb-title"><i class="fas fa-phone-volume"></i> Relevant Support Resources</div>
+          <div class="rb-title"><i class="fas fa-phone-volume"></i> {% if lang == 'en' %}Relevant Support Resources{% else %}משאבי תמיכה רלוונטיים{% endif %}</div>
           {% if category == 1 %}
+            {% if lang == 'en' %}
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Immediate medical emergency</span></div>
+          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — Immediate life threat</span></div>
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
           <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
           <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי מיידי</span></div>
           <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — סכנת חיים מיידית</span></div>
           <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
           <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}
           {% elif category == 2 %}
+            {% if lang == 'en' %}
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">MDA — Medical emergency</span></div>
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
           <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
           <div class="rb-line"><span class="rb-num">101</span><span class="rb-label">מד"א — חירום רפואי</span></div>
           <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת</span></div>
           <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}
           {% elif category == 3 %}
+            {% if lang == 'en' %}
+          <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">Child Online Protection Center — bullying, shaming, harassment</span></div>
+          <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ERAN — Emotional support hotline, anonymous 24/7</span></div>
+          <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">Police — threats, extortion, online crimes</span></div>
+          <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">SAHAR — Anonymous digital support chat</span></div>
+            {% else %}
           <div class="rb-line"><span class="rb-num">105</span><span class="rb-label">מוקד להגנה על ילדים ברשת — בריונות, שיימינג, הטרדה</span></div>
           <div class="rb-line"><span class="rb-num">1201</span><span class="rb-label">ער"ן — קו חם לתמיכה נפשית, מענה אנונימי 24/7</span></div>
           <div class="rb-line"><span class="rb-num">100</span><span class="rb-label">משטרה — איומים, סחיטה, עברות פליליות ברשת</span></div>
           <div class="rb-line"><span class="rb-num rb-site">sahar.org.il</span><span class="rb-label">סהר — צ'אט סיוע דיגיטלי אנונימי</span></div>
+            {% endif %}
           {% endif %}
         </div>
         {% endif %}
