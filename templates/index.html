@@ -311,6 +311,10 @@
     spinning = true; tick();
     try {
       const res = await fetch('/', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest'}, body: new FormData(form)});
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt.substring(0,200)}`);
+      }
       const data = await res.json();
       if (data.error) {
         document.querySelector('.result-panel').innerHTML = `<div class="form-error"><i class="fas fa-circle-exclamation"></i>${esc(data.error)}</div>`;
