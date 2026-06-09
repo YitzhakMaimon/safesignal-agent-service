@@ -30,53 +30,8 @@
   <!-- ═══ MAIN ═══ -->
   <div class="main{% if result %} has-result{% endif %}">
 
-    <!-- ═══ LEFT: RADAR ═══ -->
-    <div class="radar-section">
-
-      <!-- Radar -->
-      <div class="radar-wrap">
-
-        <!-- Base fill -->
-        <div class="radar-base"></div>
-
-        <!-- Glow ring -->
-        <div class="radar-glow"></div>
-
-        <!-- Concentric rings -->
-        <div class="radar-rings">
-          <div class="r-ring r-ring-1"></div>
-          <div class="r-ring r-ring-2"></div>
-          <div class="r-ring r-ring-3"></div>
-          <div class="r-ring r-ring-4"></div>
-        </div>
-
-        <!-- Cross lines -->
-        <div class="radar-cross"></div>
-
-        <!-- Sweep -->
-        <div class="radar-sweep" id="radarSweep"></div>
-
-        <!-- Center label -->
-        <div class="radar-center">
-          <div class="radar-center-label">SAFESIGNAL</div>
-          <div class="radar-center-sub">DIGITAL DISTRESS DETECTION</div>
-        </div>
-
-      </div>
-
-      <!-- Status bar -->
-      <div class="status-bar">
-        <div class="ss-item">
-          <div class="ss-dot" id="dot-ec2"></div> EC2 Server
-          <span class="ss-val ss-val-muted" id="val-ec2">CHECKING</span>
-        </div>
-        <div class="ss-item">
-          <div class="ss-dot" id="dot-agent"></div> Bedrock Agent
-          <span class="ss-val ss-val-muted" id="val-agent">CHECKING</span>
-        </div>
-      </div>
-
-      <!-- Result area -->
+    <!-- ═══ LEFT: RESULTS ═══ -->
+    <div class="result-panel">
       {% if result %}
       <div class="result-area">
 
@@ -164,6 +119,38 @@
 
       </div>
       {% endif %}
+    </div>
+
+    <!-- ═══ CENTER: RADAR ═══ -->
+    <div class="radar-section">
+
+      <div class="radar-wrap">
+        <div class="radar-base"></div>
+        <div class="radar-glow"></div>
+        <div class="radar-rings">
+          <div class="r-ring r-ring-1"></div>
+          <div class="r-ring r-ring-2"></div>
+          <div class="r-ring r-ring-3"></div>
+          <div class="r-ring r-ring-4"></div>
+        </div>
+        <div class="radar-cross"></div>
+        <div class="radar-sweep" id="radarSweep"></div>
+        <div class="radar-center">
+          <div class="radar-center-label">SAFESIGNAL</div>
+          <div class="radar-center-sub">DIGITAL DISTRESS DETECTION</div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="ss-item">
+          <div class="ss-dot" id="dot-ec2"></div> EC2 Server
+          <span class="ss-val ss-val-muted" id="val-ec2">CHECKING</span>
+        </div>
+        <div class="ss-item">
+          <div class="ss-dot" id="dot-agent"></div> Bedrock Agent
+          <span class="ss-val ss-val-muted" id="val-agent">CHECKING</span>
+        </div>
+      </div>
 
     </div>
 
@@ -175,7 +162,6 @@
         <div class="cp-shield"><i class="fas fa-shield-halved"></i></div>
         <div class="cp-logo-text">
           <div><span class="wm-s">Safe</span><span class="wm-sig">Signal</span></div>
-          <div class="wm-tag">Digital Resilience Assistant for Youth</div>
         </div>
       </div>
 
@@ -213,7 +199,7 @@
         <label for="user_text">Enter text, post or message to analyze:</label>
         <textarea id="user_text" name="user_text"
           placeholder="Paste a post, chat message or any suspicious text from the web..."
-          required>{% if original_text %}{{ original_text }}{% endif %}</textarea>
+          required></textarea>
         <button type="submit" class="scan-btn" id="scanBtn">
           <span id="btnContent"><i class="fas fa-satellite-dish"></i> Run Scan &amp; Analysis</span>
           <span class="btn-loading" id="btnLoading"><i class="fas fa-spinner fa-spin"></i> Analyzing... Please wait</span>
@@ -224,10 +210,8 @@
       <div class="idle-hint"><p>Agent awaiting analysis</p></div>
       {% endif %}
 
-      <!-- Agent info -->
-      <div class="agent-info">Agent: INDHHZGRD2 &nbsp;·&nbsp; Alias: E4SR5MTKOO</div>
 
-      <!-- History button -->
+<!-- History button -->
       <a href="/history" class="history-btn">
         <i class="fas fa-database"></i>
         Recent Reports

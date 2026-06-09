@@ -90,16 +90,28 @@ body::before {
    ══════════════════════════════ */
 .main {
   display: flex; flex: 1; overflow: hidden;
-  direction: ltr; /* radar left, control panel right */
+  direction: ltr;
 }
 
 /* ══════════════════════════════
-   LEFT — RADAR SECTION
+   LEFT — RESULTS PANEL
    ══════════════════════════════ */
-.radar-section {
+.result-panel {
   flex: 1;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
+  padding: 16px 14px 12px;
+  overflow-y: auto;
+  direction: rtl;
+}
+
+/* ══════════════════════════════
+   CENTER — RADAR SECTION
+   ══════════════════════════════ */
+.radar-section {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   position: relative;
   padding: 16px 0 12px;
   overflow: hidden;
@@ -293,24 +305,12 @@ body::before {
 .ss-dot-muted  { background: #3a5a4a !important; box-shadow: none !important; }
 .ss-val-muted  { color: #4a7a5a !important; }
 
-/* ── Result area (below radar) ── */
+/* ── Result area (left panel) ── */
 .result-area {
   width: 100%;
-  max-width: 560px;
-  padding: 0;
-  flex: 1;
-  overflow-y: auto;
-  position: relative;
-  z-index: 10;
-  background: var(--navy);
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
-}
-.result-text-box {
-  flex: 1;
-  overflow-y: auto;
 }
 
 .cat-banner {
@@ -454,7 +454,7 @@ body::before {
 
 /* Logo */
 .cp-logo {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
   padding-bottom: 14px;
   border-bottom: 1px solid rgba(0,245,200,0.08);
 }

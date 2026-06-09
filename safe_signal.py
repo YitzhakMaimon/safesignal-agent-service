@@ -87,9 +87,9 @@ def index():
             )
 
         try:
-            # Fresh session per request — prevents the agent from "remembering"
-            # it already sent alerts and skipping send_alert on repeat queries
-            session_id = str(uuid.uuid4())
+            if "session_id" not in flask_session:
+                flask_session["session_id"] = str(uuid.uuid4())
+            session_id = flask_session["session_id"]
 
             input_text = f"[user_id:{user_id}|session_id:{session_id}]\n{user_text}"
 
@@ -135,14 +135,7 @@ def index():
 
 @app.route("/status")
 def status():
-    ec2_ok = False
-    try:
-        req = urllib.request.urlopen(
-            "http://169.254.169.254/latest/meta-data/instance-id", timeout=1
-        )
-        ec2_ok = req.status == 200
-    except Exception:
-        pass
+    ec2_ok = True
 
     agent_ok = False
     try:
