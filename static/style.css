@@ -504,6 +504,7 @@ body::before {
   border-radius: 10px;
   cursor: default;
   transition: all 0.2s;
+  direction: ltr;
 }
 .cat-card:hover { filter: brightness(1.15); }
 .cc-icon {
