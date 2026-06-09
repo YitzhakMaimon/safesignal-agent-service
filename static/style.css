@@ -365,7 +365,6 @@ body::before {
   line-height: 1.7;
   white-space: pre-line;
   overflow-y: auto;
-  direction: rtl;
 }
 
 .history-banner {
