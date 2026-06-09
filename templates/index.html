@@ -340,6 +340,7 @@
   function applyStatus(id, ok) {
     const dot = document.getElementById('dot-' + id);
     const val = document.getElementById('val-' + id);
+    if (!dot || !val) return;
     if (ok) {
       dot.className = 'ss-dot';
       val.className = 'ss-val';
